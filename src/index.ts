@@ -5,7 +5,6 @@ import { Base64 } from 'js-base64';
 
 config();
 
-
 type Card = {
   faction: string;
   id: number;
@@ -41,6 +40,13 @@ const commands = new Map<String, Command>();
 
 const client = new Client();
 
+/**
+ * Register a new command that will execute when any user types it's name on the
+ * chat, with the corresponding prefix.
+ * @param name
+ * @param desc
+ * @param fn
+ */
 export function registerCommand(name: string, desc: string, fn: (msg: Message) => void) {
 
   commands.set(name, {
@@ -49,7 +55,11 @@ export function registerCommand(name: string, desc: string, fn: (msg: Message) =
   });
 
 }
-
+/**
+ * Transforms the message into a CommandInfo, separating the name of the command
+ * and its arguments if any.
+ * @param msg
+ */
 export function getCommandInfo(msg: Message): CommandInfo | null {
 
   if (msg.content.substr(0, PREFIX.length) !== PREFIX) return null;
@@ -65,12 +75,18 @@ export function getCommandInfo(msg: Message): CommandInfo | null {
 
 }
 
+/**
+ * Send a simple message as soon as the bot is ready to be used.
+ */
 client.on('ready', () => {
 
   console.log(`Logged in as ${client.user.tag}!`);
 
 });
 
+/**
+ * Check if the message is a valid command an execute the corresponding code.
+ */
 client.on('message', (msg: Message) => {
 
   const command = getCommandInfo(msg);
@@ -83,10 +99,17 @@ client.on('message', (msg: Message) => {
 
 });
 
+/**
+ * Attempt to login as with the given toekn.
+ */
 client.login(process.env.DISCORD_TOKEN).catch((reason) => {
   console.log(reason);
 });
 
+/**
+ * Shows the available commands and a little description of what they do.
+ * @param msg
+ */
 function help(msg: Message) {
   let cmds = '';
 
@@ -99,6 +122,11 @@ function help(msg: Message) {
 
 registerCommand('help', 'Shows the available commands', help);
 
+/**
+ * Tries to convert the text containing the cards list into a Json.
+ * @param text
+ * @param msg
+ */
 function textToJson(text: string, msg: Message): Json | null {
   const cardRegex = /^(\d)x \(\dK\) (.+)$/;
   const json: Json = {};
@@ -122,6 +150,11 @@ function textToJson(text: string, msg: Message): Json | null {
   return json;
 }
 
+/**
+ * Searches the cards.json for a card that matches the name and returns the ID
+ * of the matching card.
+ * @param name
+ */
 function getIdFromName(name: string): number | null {
   for (const card of cardsJson) {
     if (card.title == name.trim()) {
@@ -132,6 +165,11 @@ function getIdFromName(name: string): number | null {
   return null;
 }
 
+/**
+ * Turns the Json object into a string and removes {, } and " before encoding
+ * into a Base64 string.
+ * @param json
+ */
 function encodeJson(json: Json): string {
   const regex = /[{}"]/gm;
   const str = JSON.stringify(json).replace(regex, '');
@@ -140,6 +178,11 @@ function encodeJson(json: Json): string {
   return result;
 }
 
+/**
+ * Generates a Kards Deck Builder URL based on the cards list on the message and
+ * sends the URL to the channel.
+ * @param msg
+ */
 function kdb(msg: Message) {
   const deck = getCommandInfo(msg).args || '';
 
