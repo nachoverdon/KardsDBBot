@@ -143,7 +143,6 @@ function encodeJson(json: Json): string {
 function kdb(msg: Message) {
   const deck = getCommandInfo(msg).args || '';
 
-  // TODO: await Http Request CARDS_JSON
   try {
     request(CARDS_JSON, function(error, respone, body) {
       if (error) throw error;
