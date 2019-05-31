@@ -141,7 +141,7 @@ function encodeJson(json: Json): string {
 }
 
 function kdb(msg: Message) {
-  const deck = getCommandInfo(msg).args;
+  const deck = getCommandInfo(msg).args || '';
 
   // TODO: await Http Request CARDS_JSON
   try {
@@ -152,7 +152,6 @@ function kdb(msg: Message) {
       const json = textToJson(deck, msg);
 
       if (json === null) {
-        console.log('json null');
         return;
       }
 
