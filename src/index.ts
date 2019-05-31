@@ -84,7 +84,7 @@ client.on('message', (msg: Message) => {
 });
 
 client.login(process.env.DISCORD_TOKEN).catch((reason) => {
-  console.log(process.env, reason);
+  console.log(reason);
 });
 
 function help(msg: Message) {

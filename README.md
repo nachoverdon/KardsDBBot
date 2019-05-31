@@ -1,6 +1,6 @@
 # KardsDBBot
 
-You need to create a `.env` file, or create variables if you are using a service like Heroku, with the Discord token and API keys. Example:
+You need to create a `.env` file, or create variables if you are using a service like Heroku, with the Discord token. Example:
 
 ```
 DISCORD_TOKEN=XXXXX
