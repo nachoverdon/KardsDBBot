@@ -183,19 +183,42 @@ function encodeJson(json: Json): string {
  * Fetches the cards list, but only if it has not been done before or 1 minute
  * has passed since the last time it was fetched.
  */
-function fetchCardsJson() {
+function fetchCardsJson(msg?: Message) {
   const now = Date.now();
   try {
     if (cardsJson === null || now - lastCheked >= 60000) {
-      request(CARDS_JSON, function(error, response, body) {
-        if (error) throw error;
+        request(CARDS_JSON, function(error, response, body) {
+          if (error) throw error;
 
-        cardsJson = JSON.parse(body);
-        lastCheked = now;
-      });
+          cardsJson = JSON.parse(body);
+          lastCheked = now;
+          if (msg) generateUrl(msg);
+        });
+    } else if (msg) {
+      generateUrl(msg);
     }
   } catch (e) {
     console.log('Error while trying to fetch cards.json\n' + e);
+  }
+}
+
+/**
+ * Generate the URL based on the card list from the message and sends it to the
+ * channel.
+ * @param msg
+ */
+function generateUrl(msg: Message) {
+  if (cardsJson !== null) {
+    const deck = getCommandInfo(msg).args || '';
+    const json = textToJson(deck, msg);
+
+    if (json === null) {
+      return;
+    }
+
+    const url = VIEW_DATA + encodeJson(json);
+
+    msg.channel.send(url);
   }
 }
 
@@ -206,20 +229,7 @@ function fetchCardsJson() {
  */
 function kdb(msg: Message) {
   try {
-    fetchCardsJson();
-
-    if (cardsJson !== null) {
-      const deck = getCommandInfo(msg).args || '';
-      const json = textToJson(deck, msg);
-
-      if (json === null) {
-        return;
-      }
-
-      const url = VIEW_DATA + encodeJson(json);
-
-      msg.channel.send(url);
-    }
+    fetchCardsJson(msg);
   } catch (e) {
     console.log('cards.json cannot be parsed.\n' + e);
   }
