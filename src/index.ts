@@ -34,7 +34,8 @@ const PREFIX = '.';
 const BASE_URL = 'https://kardsdeck.opengamela.com/';
 const VIEW_DATA = BASE_URL + 'view?data=';
 const CARDS_JSON = BASE_URL + 'assets/data/cards.json';
-let cardsJson: Card[];
+let cardsJson: Card[] = null;
+let lastCheked: number;
 
 const commands = new Map<String, Command>();
 
@@ -81,6 +82,7 @@ export function getCommandInfo(msg: Message): CommandInfo | null {
 client.on('ready', () => {
 
   console.log(`Logged in as ${client.user.tag}!`);
+  fetchCardsJson();
 
 });
 
@@ -174,8 +176,27 @@ function encodeJson(json: Json): string {
   const regex = /[{}"]/gm;
   const str = JSON.stringify(json).replace(regex, '');
   const result = Base64.encodeURI(str);
-  console.log(result);
   return result;
+}
+
+/**
+ * Fetches the cards list, but only if it has not been done before or 1 minute
+ * has passed since the last time it was fetched.
+ */
+function fetchCardsJson() {
+  const now = Date.now();
+  try {
+    if (cardsJson === null || now - lastCheked >= 60000) {
+      request(CARDS_JSON, function(error, response, body) {
+        if (error) throw error;
+
+        cardsJson = JSON.parse(body);
+        lastCheked = now;
+      });
+    }
+  } catch (e) {
+    console.log('Error while trying to fetch cards.json\n' + e);
+  }
 }
 
 /**
@@ -184,13 +205,11 @@ function encodeJson(json: Json): string {
  * @param msg
  */
 function kdb(msg: Message) {
-  const deck = getCommandInfo(msg).args || '';
-
   try {
-    request(CARDS_JSON, function(error, respone, body) {
-      if (error) throw error;
+    fetchCardsJson();
 
-      cardsJson = JSON.parse(body);
+    if (cardsJson !== null) {
+      const deck = getCommandInfo(msg).args || '';
       const json = textToJson(deck, msg);
 
       if (json === null) {
@@ -200,9 +219,9 @@ function kdb(msg: Message) {
       const url = VIEW_DATA + encodeJson(json);
 
       msg.channel.send(url);
-    });
+    }
   } catch (e) {
-    console.log('cards.json cannot be parsed.');
+    console.log('cards.json cannot be parsed.\n' + e);
   }
 }
 
