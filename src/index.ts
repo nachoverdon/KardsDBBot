@@ -32,7 +32,11 @@ interface Json {
 
 const PREFIX = '.';
 const BASE_URL = 'https://kardsdeck.opengamela.com/';
+// TODO: Use a proper GET request instead of strings lol
 const VIEW_DATA = BASE_URL + 'view?data=';
+const BUILD_DECK = BASE_URL + 'build-deck?primary=';
+const SECONDARY = '&secondary=';
+const DATA = '&data=';
 const CARDS_JSON = BASE_URL + 'assets/data/cards.json';
 let cardsJson: Card[] = null;
 let lastCheked: number;
@@ -211,12 +215,22 @@ function generateUrl(msg: Message) {
   if (cardsJson !== null) {
     const deck = getCommandInfo(msg).args || '';
     const json = textToJson(deck, msg);
+    const majorRegex = /^Major power: (\w+)$/gm;
+    const allyRegex = /^Ally: (\w+)$/gm;
 
     if (json === null) {
       return;
     }
 
-    const url = VIEW_DATA + encodeJson(json);
+    let url: string;
+    const base64 = encodeJson(json);
+    try {
+      const major = majorRegex.exec(deck)[1];
+      const ally = allyRegex.exec(deck)[1];
+      url = BUILD_DECK + major + SECONDARY + ally + DATA + base64;
+    } catch (e) {
+      url = VIEW_DATA + base64;
+    }
 
     msg.channel.send(url);
   }
