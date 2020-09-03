@@ -16,7 +16,7 @@
     "dotenv": "^8.2.0",
     "eslint": "^5.16.0",
     "js-base64": "^2.5.1",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "typescript": "^3.4.5"
   },
   "devDependencies": {},
