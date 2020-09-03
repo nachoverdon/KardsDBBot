@@ -15,7 +15,7 @@
     "discord.js": "^11.4.2",
     "dotenv": "^8.2.0",
     "eslint": "^5.16.0",
-    "js-base64": "^2.5.1",
+    "js-base64": "^3.4.5",
     "request": "^2.88.2",
     "typescript": "^3.4.5"
   },
